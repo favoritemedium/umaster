@@ -1,0 +1,141 @@
+import requests
+import csv
+from flask import session
+
+COLUMNS = [
+    "Short Summary",
+    "Full Description",
+    "Priority",
+    "Severity",
+    "Component",
+    "Assign To",
+    "Milestone",
+]
+
+XMLTAGS = [
+    "summary",
+    "description",
+    "priority",
+    "severity-id",
+    "component-id",
+    "assignee-id",
+    "milestone-id",
+]
+
+def get_generic(path):
+    url = "https://%s/%s" % (session.get('domain'), path)
+    headers = {'Accept': 'application/json'}
+    auth = requests.auth.HTTPBasicAuth(session.get('user'), session.get('pw'))
+    r = requests.get(url, headers=headers, auth=auth)
+    if r.status_code != 200 and r.status_code != 304:
+        # TODO: better error handling
+        print("Unexpected status code %d for %s" % (r.status_code,url))
+        return False
+    return r.json()
+
+def get_projects():
+    projects = get_generic('projects')
+    if projects == False:
+        return False
+    return [(p['id'],p['title']) for p in projects]
+
+def get_severities(projectid):
+    severities = get_generic("projects/%d/severities" % (projectid,))
+    if severities == False:
+        return False
+    return {s['id']: s['name'] for s in severities} or {}
+
+def get_components(projectid):
+    components = get_generic("projects/%d/components" % (projectid,))
+    if components == False:
+        return False
+    return {c['id']: c['name'] for c in components}
+
+def get_milestones(projectid):
+    milestones = get_generic("projects/%d/milestones" % (projectid,))
+    if milestones == False:
+        return False
+    return {m['id']: m['title'] for m in milestones}
+
+def get_people(projectid):
+    people = get_generic("projects/%d/people" % (projectid,))
+    if people == False:
+        return False
+    return {p['id']: (p['first_name'] + ' ' + p['last_name']).strip() for p in people}
+
+def parse_tickets(csvfile, projectid):
+    columnchoices = [
+        None,
+        None,
+        {1: "Lowest", 2: "Low", 3: "Normal", 4: "High", 5: "Highest"},
+        session['severities'],
+        session['components'],
+        session['people'],
+        session['milestones'],
+    ]
+    reader = csv.reader(csvfile)
+    columns = [c.casefold() for c in COLUMNS]
+    columnmap = {}
+    tickets = []
+    rownum = 0
+    for row in reader:
+        if rownum == 0:
+            colnum = 0
+            for col in row:
+                cc = col.strip().rstrip(':').casefold()
+                if cc in columns:
+                    columnmap[columns.index(cc)] = colnum
+                colnum += 1
+        else:
+            ticket = [''] * len(COLUMNS)
+            for i in columnmap:
+                ticket[i] = fuzzyfind(row[columnmap[i]], columnchoices[i])
+            if ticket[2][0] is None:
+                ticket[2] = (3, "Normal")  # require a priority
+            tickets.append(ticket)
+        rownum += 1
+    return tickets
+
+def fuzzyfind(target, choices):
+    if choices is None:
+        return (target, target)
+    if not choices:
+        return (None, '')
+    t = target.casefold()
+    for choice in choices:
+        val = choices[choice]
+        if val.casefold() == t:
+            return (choice, val)
+    return (None, '')
+
+def ticket2xml(ticket):
+    lines = ['<ticket>']
+    for i in range(0,len(ticket)):
+        val = ticket[i][0]
+        if val is not None:
+            tag = XMLTAGS[i]
+            if tag[-3:] == "-id":
+                lines.append('<%s type="integer">' % (tag,))
+            else:
+                lines.append('<%s>' % (tag,))
+            lines.append(str(val))
+            lines.append('</%s>' % (tag,))
+    lines.append('</ticket>')
+    return ''.join(lines)
+
+def tickets2xml(tickets):
+    lines = []
+    for ticket in tickets:
+        lines.append(ticket2xml(ticket))
+    return '\n'.join(lines)
+
+def post_tickets(projectid, tickets):
+    url = "https://%s/projects/%d/tickets" % (session.get('domain'), projectid)
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/xml'}
+    auth = requests.auth.HTTPBasicAuth(session.get('user'), session.get('pw'))
+    for ticket in tickets:
+        data = ticket2xml(ticket)
+        r = requests.post(url, headers=headers, auth=auth, data=data)
+        if r.status_code != 201:
+            print("Unexpected status code %d for %s" % (r.status_code,url))
+            print(r.text)

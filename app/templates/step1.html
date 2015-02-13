@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container-fluid">
+    <h1>Step 1 <small>Sign in to Unfuddle</small></h1>
+    <form action="step1" method="POST">
+      {{ form.hidden_tag() }}
+      <div class="row">
+        <div class="col-sm-3 col-lg-2">Unfuddle domain</div>
+        <div class="col-sm-5 col-md-4">https://{{ form.domain(class="form-control", autofocus=True) }}/</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3 col-lg-2">Unfuddle username</div>
+        <div class="col-sm-5 col-md-4">{{ form.username(class="form-control") }}</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3 col-lg-2">Unfuddle password</div>
+        <div class="col-sm-5 col-md-4">{{ form.password(class="form-control") }}</div>
+      </div>
+      <div class="row">
+        <div class="col-sm-3"><input type="submit" value="Sign In"></div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container-fluid">
+    <h1>Step 4 <small>Verify the tickets</small></h1>
+    <div class="row">
+      <div class="col-xs-12">Project: {{ project }}</div>
+      <div class="col-xs-12">{{ howmany }} ticket(s) found.</div>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr>
+      </thead>
+      <tbody>
+        {% for ticket in tickets %}
+          <tr>{% for column in ticket %}<td>{{ column[1] }}</td>{% endfor %}</tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    <form action="step4" method="POST">
+      <div class="row">
+        <div class="col-sm-6">{{ form.hidden_tag() }}<input type="submit" value="Submit tickets"></div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

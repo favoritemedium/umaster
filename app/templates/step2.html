@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container-fluid">
+    <h1>Step 2 <small>Choose your project</small></h1>
+    <form action="step2" method="POST">
+      <div class="row">
+        {{ form.hidden_tag() }}
+        <div class="col-sm-6">{{ form.project(class="form-control", autofocus=True) }}</div>
+        <div class="col-sm-2"><input type="submit" value="Choose"></div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

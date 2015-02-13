@@ -1,0 +1,15 @@
+{% extends "base.html" %}
+{% block content %}
+  <div class="container-fluid">
+    <h1>Step 3 <small>Upload the tickets</small></h1>
+    <div class="row">
+      <div class="col-xs-12">Project: {{ project }}</div>
+    </div>
+    <form action="step3" method="POST" enctype="multipart/form-data">
+      <div class="row">
+        <div class="col-sm-6">{{ form.csvfile(autofocus=True) }}</div>
+        <div class="col-sm-6">{{ form.hidden_tag() }}<input type="submit" value="Upload"></div>
+      </div>
+    </form>
+  </div>
+{% endblock %}

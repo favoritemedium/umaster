@@ -1,0 +1,6 @@
+/venv/
+/vact
+*.pyc
+/tmp
+.*.swp
+/flask_session/
