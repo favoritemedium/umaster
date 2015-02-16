@@ -1,11 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
   <div class="container-fluid">
-    <h1>Step 4 <small>Verify the tickets</small></h1>
-    <div class="row">
-      <div class="col-xs-12">Project: {{ project }}</div>
-      <div class="col-xs-12">{{ howmany }} ticket(s) found.</div>
-    </div>
+    <h1 class="rc4">Step 4 <small>Verify the tickets</small></h1>
+    <p class="lead"><strong>Project:</strong> {{ project }}</p>
     <table class="table">
       <thead>
         <tr>{% for column in columns %}<th>{{ column }}</th>{% endfor %}</tr>
@@ -16,10 +13,10 @@
         {% endfor %}
       </tbody>
     </table>
+    <p class="Load"><strong>Total:</strong> {{ howmany }} ticket(s).</p>
     <form action="step4" method="POST">
-      <div class="row">
-        <div class="col-sm-6">{{ form.hidden_tag() }}<input type="submit" value="Submit tickets"></div>
-      </div>
+      {{ form.hidden_tag() }}
+      <button type="submit" class="btn btn-primary">Submit tickets</button>
     </form>
   </div>
 {% endblock %}
