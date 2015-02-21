@@ -9,5 +9,3 @@ app.config.from_object('config')
 Session(app)
 
 from app import views
-
-app.logger.debug(app.secret_key)
