@@ -5,6 +5,9 @@ from werkzeug.contrib.fixers import ProxyFix
 app = Flask(__name__)
 app.wsgi_app = ProxyFix(app.wsgi_app)
 app.config.from_object('config')
+
 Session(app)
 
 from app import views
+
+app.logger.debug(app.secret_key)
