@@ -1,6 +1,7 @@
 import requests
 import csv
 from flask import session
+from threading import Thread
 
 COLUMNS = [
     "Short Summary",
@@ -129,13 +130,17 @@ def tickets2xml(tickets):
         lines.append(ticket2xml(ticket))
     return '\n'.join(lines)
 
-def post_tickets(projectid, tickets):
-    url = "https://%s/projects/%d/tickets" % (session.get('domain'), projectid)
+def post_tickets_worker(url, auth, tickets):
     headers = {'Accept': 'application/json', 'Content-Type': 'application/xml'}
-    auth = requests.auth.HTTPBasicAuth(session.get('user'), session.get('pw'))
     for ticket in tickets:
         data = ticket2xml(ticket)
         r = requests.post(url, headers=headers, auth=auth, data=data)
         if r.status_code != 201:
-            print("Unexpected status code %d for %s" % (r.status_code,url))
-            print(r.text)
+            app.logger.debug("Unexpected status code %d for %s" % (r.status_code,url))
+            app.logger.debug(r.text)
+
+def post_tickets(projectid, tickets):
+    url = "https://%s/projects/%d/tickets" % (session.get('domain'), projectid)
+    auth = requests.auth.HTTPBasicAuth(session.get('user'), session.get('pw'))
+    t = Thread(target=post_tickets_worker, args=(url, auth, tickets), daemon=True)
+    t.start()
