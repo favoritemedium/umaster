@@ -16,8 +16,15 @@ def step1():
         if projects:
             session['projects'] = projects
             return redirect('/step2')
-        else:
-            session['pw'] = ''
+
+        session['pw'] = ''
+        err = unfuddle.get_last_error()
+        if err:
+            if err[0] == 401:
+                form.password.errors.append(err[1])
+            else:
+                form.domain.errors.append(err[1])
+
     return render_template("step1.html", form=form)
 
 @app.route('/step2', methods=['GET','POST'])

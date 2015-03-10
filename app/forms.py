@@ -4,15 +4,15 @@ from wtforms import TextField, PasswordField, SelectField
 from wtforms.validators import Required
 
 class LoginForm(Form):
-    domain = TextField('domain', validators=[Required()])
-    username = TextField('username', validators=[Required()])
-    password = PasswordField('password', validators=[Required()])
+    domain = TextField('domain', validators=[Required(message="Domain is required.")])
+    username = TextField('username', validators=[Required(message="Username is required.")])
+    password = PasswordField('password', validators=[Required(message="Password is required.")])
 
 class ChooseProjectForm(Form):
-    project = SelectField('project', coerce=int, validators=[Required()])
+    project = SelectField('project', coerce=int, validators=[Required("Please choose a project.")])
 
 class UploadForm(Form):
-    csvfile = FileField('csvfile', validators=[Required()])
+    csvfile = FileField('csvfile', validators=[Required("Please choose a file.")])
 
 class FinalForm(Form):
     pass

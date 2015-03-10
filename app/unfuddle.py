@@ -23,16 +23,38 @@ XMLTAGS = [
     "milestone-id",
 ]
 
+last_error = None
+
 def get_generic(path):
+    global last_error
+    last_error = None
+
     url = "https://%s/%s" % (session.get('domain'), path)
     headers = {'Accept': 'application/json'}
     auth = requests.auth.HTTPBasicAuth(session.get('user'), session.get('pw'))
-    r = requests.get(url, headers=headers, auth=auth)
-    if r.status_code != 200 and r.status_code != 304:
-        # TODO: better error handling
-        print("Unexpected status code %d for %s" % (r.status_code,url))
+
+    try:
+        r = requests.get(url, headers=headers, auth=auth, timeout=15.0)
+    except requests.exceptions.Timeout:
+        last_error = (408, "Connection timeout.")
         return False
-    return r.json()
+    except requests.exceptions.RequestException as e:
+        last_error = (111, "Connection error.")
+        return False
+
+    if r.status_code == 200 or r.status_code == 304:
+        return r.json()
+
+    if r.status_code == 401:
+        last_error = (401, "Authorization failure.")
+        return False
+
+    app.logger.debug("Unexpected status code %d for %s" % (r.status_code, url))
+    last_error = (r.status_code, "Connection error.")
+    return False
+
+def get_last_error():
+    return last_error
 
 def get_projects():
     projects = get_generic('projects')

@@ -4,25 +4,28 @@
     <h1 class="rc1">Step 1 <small>Sign in to Unfuddle</small></h1>
     <form action="step1" method="POST" class="form-horizontal">
       {{ form.hidden_tag() }}
-      <div class="form-group">
+      <div class="form-group{% if form.domain.errors %} has-error{% endif %}">
         <label for="domain" class="col-sm-3 col-lg-2 control-label">Unfuddle domain</label>
         <div class="col-sm-9 col-lg-10">
           <div class="input-group">
             <span class="input-group-addon">https://</span>
             {{ form.domain(class="form-control", autofocus=True, placeholder="e.g. example.unfuddle.com") }}
           </div>
+          {% for error in form.domain.errors %}<p class="text-danger">{{ error }}</p>{% endfor %}
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group{% if form.username.errors %} has-error{% endif %}">
         <label for="username" class="col-sm-3 col-lg-2 control-label">Unfuddle username</label>
         <div class="col-sm-9 col-lg-10">
           {{ form.username(class="form-control") }}
+          {% for error in form.username.errors %}<p class="text-danger">{{ error }}</p>{% endfor %}
         </div>
       </div>
-      <div class="form-group">
+      <div class="form-group{% if form.password.errors %} has-error{% endif %}">
         <label for="password" class="col-sm-3 col-lg-2 control-label">Unfuddle password</label>
         <div class="col-sm-9 col-lg-10">
           {{ form.password(class="form-control") }}
+          {% for error in form.password.errors %}<p class="text-danger">{{ error }}</p>{% endfor %}
         </div>
       </div>
       <div class="form-group">
