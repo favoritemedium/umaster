@@ -116,6 +116,10 @@ def parse_tickets(csvfile, projectid):
             if ticket[2][0] is None:
                 ticket[2] = (3, "Normal")  # require a priority
             tickets.append(ticket)
+
+            if len(tickets) >= 500:  # 500 ticket limit
+                return tickets
+
         rownum += 1
     return tickets
 
