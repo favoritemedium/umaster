@@ -45,7 +45,7 @@ def step2():
             session['milestones'] = unfuddle.get_milestones(projectid)
             return redirect('/step3')
     return render_template("step2.html", form=form)
- 
+
 @app.route('/step3', methods=['GET','POST'])
 def step3():
     project = session.get('project')
@@ -53,7 +53,7 @@ def step3():
        return redirect('/step2')
     form = UploadForm()
     if form.validate_on_submit():
-        session['tickets'] = unfuddle.parse_tickets(io.StringIO(form.csvfile.data.read().decode()), project[0])
+        session['tickets'] = unfuddle.parse_tickets(io.StringIO(form.csvfile.data.read().decode('utf-8-sig')), project[0])
         return redirect('/step4')
     return render_template("step3.html", project=project[1], form=form)
 
