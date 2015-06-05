@@ -4,8 +4,8 @@ from flask import session
 from threading import Thread
 
 COLUMNS = [
-    "Short Summary",
-    "Full Description",
+    "Title",
+    "Description",
     "Priority",
     "Severity",
     "Component",
