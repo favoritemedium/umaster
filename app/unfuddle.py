@@ -110,9 +110,10 @@ def parse_tickets(csvfile, projectid):
                     columnmap[columns.index(cc)] = colnum
                 colnum += 1
         else:
-            ticket = [''] * len(COLUMNS)
+            ticket = [(None,'')] * len(COLUMNS)
             for i in columnmap:
                 ticket[i] = fuzzyfind(row[columnmap[i]], columnchoices[i])
+            print(ticket)
             if ticket[2][0] is None:
                 ticket[2] = (3, "Normal")  # require a priority
             tickets.append(ticket)
