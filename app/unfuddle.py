@@ -98,27 +98,42 @@ def parse_tickets(csvfile, projectid):
     ]
     reader = csv.reader(csvfile)
     columns = [c.casefold() for c in COLUMNS]
-    columnmap = {}
+    columnmap = {} # index the recognized columns
+    othermap = []  # index the unrecognized columns
     tickets = []
     rownum = 0
     for row in reader:
         if rownum == 0:
             colnum = 0
             for col in row:
-                cc = col.strip().rstrip(':').casefold()
-                if cc in columns:
-                    columnmap[columns.index(cc)] = colnum
+                cc = col.strip().rstrip(':')
+                cf = cc.casefold()
+                if cf in columns:
+                    columnmap[columns.index(cf)] = colnum
+                else:
+                    othermap.append((cc, colnum))
                 colnum += 1
         else:
             ticket = [(None,'')] * len(COLUMNS)
+            extras = []
             for i in columnmap:
                 ticket[i] = fuzzyfind(row[columnmap[i]], columnchoices[i])
-            print(ticket)
+
+            # add all the unknown fields to the description
+            for cc, colnum in othermap:
+                if row[colnum]:
+                    extras.append("**%s**\n\n%s\n" % (cc, row[colnum]))
+            if extras:
+                desc = ticket[1][1] + "\n\n" + "\n".join(extras)
+                ticket[1] = (desc, desc)
+
+            # require a priority
             if ticket[2][0] is None:
-                ticket[2] = (3, "Normal")  # require a priority
+                ticket[2] = (3, "Normal")
             tickets.append(ticket)
 
-            if len(tickets) >= 500:  # 500 ticket limit
+            # limit 500 tickets
+            if len(tickets) >= 500:
                 return tickets
 
         rownum += 1
