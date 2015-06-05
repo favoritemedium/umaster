@@ -1,5 +1,6 @@
 import requests
 import csv
+import html
 from flask import session
 from threading import Thread
 
@@ -161,7 +162,7 @@ def ticket2xml(ticket):
                 lines.append('<%s type="integer">' % (tag,))
             else:
                 lines.append('<%s>' % (tag,))
-            lines.append(str(val))
+            lines.append(html.escape(str(val)))
             lines.append('</%s>' % (tag,))
     lines.append('</ticket>')
     return ''.join(lines)
@@ -173,10 +174,10 @@ def tickets2xml(tickets):
     return '\n'.join(lines)
 
 def post_tickets_worker(url, auth, tickets):
-    headers = {'Accept': 'application/json', 'Content-Type': 'application/xml'}
+    headers = {'Accept': 'application/json', 'Content-Type': 'application/xml;charset=utf-8'}
     for ticket in tickets:
         data = ticket2xml(ticket)
-        r = requests.post(url, headers=headers, auth=auth, data=data)
+        r = requests.post(url, headers=headers, auth=auth, data=data.encode('utf-8'))
         if r.status_code != 201:
             app.logger.debug("Unexpected status code %d for %s" % (r.status_code,url))
             app.logger.debug(r.text)
